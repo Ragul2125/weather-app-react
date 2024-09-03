@@ -8,9 +8,10 @@ import snow from "../assets/snow.png";
 import humidity from "../assets/humidity.png";
 import wind from "../assets/wind.png";
 import axios from "axios";
-
+import { useSelector ,useDispatch} from "react-redux";
+import { setWeather } from "../features/weather";
 const card = () => {
-    /* const options = {
+  /* const options = {
         method: 'GET',
         url: 'https://meteostat.p.rapidapi.com/stations/daily',
         params: {
@@ -31,43 +32,60 @@ const card = () => {
     }
     run()
 },[]) */
-let place;
-const [weather,setWeather]=useState({})
-const KEY="6969bbd48fe69a8173561054670ccbf9"
-const [city,setCity]=useState("India")
-useEffect(()=>{
-    const fetchdata = async ()=>{
-        try {
-            const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${KEY}`);
-            setWeather({
-                "city":response.data.name,
-                "temp":Math.floor(response.data.main.temp-273.15),
-                "humidity":response.data.main.humidity,
-                "speed":response.data.wind.speed
-            })
-        } catch (error) {
-            console.log(error)
-        }
-     }
-     fetchdata()
-},[city])
-console.log(city)
+  const dispatch = useDispatch();
+  const weather = useSelector((state) => state.weather);
+  const [city, setCity] = useState("london");
+  let place;
+  const KEY = "6969bbd48fe69a8173561054670ccbf9";
+
+  useEffect(() => {
+    const fetchdata = async () => {
+      try {
+        const response = await axios.get(
+          `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${KEY}`
+        );
+        dispatch(setWeather({
+          city: response.data.name,
+          temp: Math.floor(response.data.main.temp - 273.15),
+          humidity: response.data.main.humidity,
+          speed: response.data.wind.speed,
+        }))
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchdata();
+  }, [city]);
   return (
     <>
       <div className="container">
         <div className="search-bar">
-          <input type="text" placeholder="Search" onChange={(e)=>{ place = e.target.value}} />
-          <img src={searchicon} onClick={()=>{setCity(place)}} />
+          <input
+            type="text"
+            placeholder="Search"
+            onChange={(e) => {
+              place = e.target.value;
+            }}
+          />
+          <img
+            src={searchicon}
+            onClick={() => {
+              setCity(place)
+            }}
+          />
         </div>
         <div className="weather">
-          {
-            weather.temp>=35 ?<img src={clear}/>:
-             weather.temp>=30?<img src={cloud}/>:
-             weather.temp>=25?<img src={drizzle}/>:
-             weather.temp>=15?<img src={rain}/>:
-             <img src={snow}/>
-
-          }
+          {weather.temp >= 35 ? (
+            <img src={clear} />
+          ) : weather.temp >= 30 ? (
+            <img src={cloud} />
+          ) : weather.temp >= 25 ? (
+            <img src={drizzle} />
+          ) : weather.temp >= 15 ? (
+            <img src={rain} />
+          ) : (
+            <img src={snow} />
+          )}
           <h1 className="temp">{weather.temp}°C</h1>
           <h2 className="city">{weather.name}</h2>
         </div>
